@@ -1,13 +1,15 @@
-FROM node:18-alpine
-
-ENV NODE_ENV=production
+FROM node:18-alpine AS build
 
 WORKDIR /app
 
-COPY ["package.json", "package-lock.json*", "./"]
-
-RUN npm install --production
-
 COPY . .
 
-CMD ["node", "server.js"]
+RUN npm install
+
+RUN npm run build
+
+FROM nginx:alpine
+
+COPY --from=build /app/dist/angular-app/ /usr/share/nginx/html
+
+EXPOSE 80
